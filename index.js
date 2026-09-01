@@ -27,10 +27,11 @@ app.get('/personas/:id', (req, res) => {
   const persona = personas.find(p => p.id === id);
 
   if (!persona) {
-    return res.status(404).json({ mensaje: "Persona no encontrada" });
+    res.status(404).json({ mensaje: "Persona no encontrada" });
+  } else {
+    res.status(200).json(persona);
   }
 
-  res.status(200).json(persona);
 });
 
 // ==========================================
@@ -45,7 +46,7 @@ app.post('/personas', (req, res) => {
 
   const nuevaPersona = {
     id: personas.length > 0 ? personas[personas.length - 1].id + 1 : 1, // Autoincremento simple
-    nombre,
+    nombre, // nombre: nombre
     edad: parseInt(edad)
   };
 
@@ -58,7 +59,7 @@ app.post('/personas', (req, res) => {
 // ==========================================
 app.put('/personas/:id', (req, res) => {
   const id = parseInt(req.params.id);
-  const { nombre, edad } = req.body;
+  // const { nombre, edad } = req.body;
 
   const index = personas.findIndex(p => p.id === id);
 
@@ -68,9 +69,8 @@ app.put('/personas/:id', (req, res) => {
 
   // Actualizamos solo los campos que vengan en la petición, si no, se quedan igual
   personas[index] = {
-    ...personas[index],
-    nombre: nombre || personas[index].nombre,
-    edad: edad ? parseInt(edad) : personas[index].edad
+    id: personas[index].id,
+    ...req.body
   };
 
   res.status(200).json({ mensaje: "Persona actualizada", persona: personas[index] });
@@ -81,16 +81,16 @@ app.put('/personas/:id', (req, res) => {
 // ==========================================
 app.delete('/personas/:id', (req, res) => {
   const id = parseInt(req.params.id);
-  const index = personas.findIndex(p => p.id === id);
+  const persona = personas.find(p => p.id === id);
 
-  if (index === -1) {
+  if (!persona) {
     return res.status(404).json({ mensaje: "Persona no encontrada" });
   }
 
-  // Eliminamos el elemento del array
-  const personaEliminada = personas.splice(index, 1);
+  // Reasignamos 'personas' con un nuevo array sin el elemento
+  personas = personas.filter(p => p.id !== id);
 
-  res.status(200).json({ mensaje: "Persona eliminada", persona: personaEliminada[0] });
+  res.status(200).json({ mensaje: "Persona eliminada", persona });
 });
 
 // Iniciar el servidor
